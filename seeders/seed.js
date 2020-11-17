@@ -1,9 +1,20 @@
 let mongoose = require("mongoose");
 let db = require("../models");
+const seeder = require('mongoose-seed');
 
-mongoose.connect("mongodb://localhost/workout", {
-  useNewUrlParser: true,
-  useFindAndModify: false
+// Connect to MongoDB via Mongoose
+seeder.connect(process.env.MONGODB_URI || "mongodb://localhost/workout", function() {
+  // Load Mongoose models
+  seeder.loadModels([
+    'models/index.js',
+  ]);
+  // Clear specified collections
+  seeder.clearModels(['Workout'], function() {
+    // Callback to populate DB once collections have been cleared
+    seeder.populateModels(data, function() {
+      seeder.disconnect();
+    });
+  });
 });
 
 let workoutSeed = [
@@ -123,6 +134,7 @@ let workoutSeed = [
     ]
   }
 ];
+
 
 db.Workout.deleteMany({})
   .then(() => db.Workout.collection.insertMany(workoutSeed))
